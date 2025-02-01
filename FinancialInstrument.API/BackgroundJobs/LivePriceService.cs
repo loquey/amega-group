@@ -52,7 +52,10 @@ namespace FinancialInstrument.API.BackgroundJobs
             var readBuffer = new byte[4096];
             while (true)
             {
-                if (tiingoClient.State != WebSocketState.Open) break;
+                if (tiingoClient.State != WebSocketState.Open) {
+                    logger.LogCritical("Connection to service provider lost";
+                    break;
+                }
 
                 var receiveResult = await tiingoClient.ReceiveAsync(
                     new ArraySegment<byte>(readBuffer), CancellationToken.None);
