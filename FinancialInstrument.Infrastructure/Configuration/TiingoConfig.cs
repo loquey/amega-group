@@ -16,5 +16,8 @@ namespace FinancialInstrument.Infrastructure.Configuration
 
         [Required]
         public string ApiKey { get; set; }
+
+        [Required]
+        public string WebSocketUrl { get; set; }
     }
 }

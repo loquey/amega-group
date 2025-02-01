@@ -1,6 +1,15 @@
 ﻿
 using FinancialInstrument.Application.MessageSerialiazers;
 using FinancialInstrument.Application.SocketHandlers;
+using FinancialInstrument.Infrastructure.Configuration;
+using FinancialInstrument.Infrastructure.Repositories;
+using FinancialInstrument.Infrastructure.ServiceClients.Messages;
+
+using Microsoft.Extensions.Options;
+
+using System.Net;
+using System.Net.WebSockets;
+using System.Text;
 
 namespace FinancialInstrument.API.BackgroundJobs
 {
@@ -15,12 +24,46 @@ namespace FinancialInstrument.API.BackgroundJobs
 
             ISocketRegistry socketRegistry = scope.ServiceProvider.GetRequiredService<ISocketRegistry>();
             IMessageSerializer messageSerializer = scope.ServiceProvider.GetRequiredService<IMessageSerializer>();
+            IOptions<TiingoConfig> tiingoConfig = scope.ServiceProvider.GetRequiredService<IOptions<TiingoConfig>>();
+            ITickerRepository tickerRepository = scope.ServiceProvider.GetRequiredService<ITickerRepository>();
 
+            var tiingoClient = new ClientWebSocket();
+            try {
+                await tiingoClient.ConnectAsync(new Uri(tiingoConfig.Value.WebSocketUrl), stoppingToken);
+            }
+            catch (Exception ex) { logger.LogError(ex, "errpr"); }
+            var tickers = tickerRepository.GetTickers().Select(s =>s.TickerSymnbol).ToArray();
+
+            var subscribeMessage = new {
+                @event = "subscribe",
+                subscription = new { name = "ticker"},
+                pair = tickers
+            };
+
+            await tiingoClient.SendAsync(
+                new ArraySegment<byte>(messageSerializer.Serialize(subscribeMessage)),
+                WebSocketMessageType.Text,
+                true,
+                stoppingToken
+            );
+
+            var readBuffer = new byte[4096];
             while (true)
             {
-                await socketRegistry.BroadcastMessageAsync(messageSerializer.Serialize(new { msg = "Hello websocket broadcast" }));
+                if (tiingoClient.State != WebSocketState.Open) break;
 
-                await Task.Delay(3000);
+                var receiveResult = await tiingoClient.ReceiveAsync(
+                    new ArraySegment<byte>(readBuffer), CancellationToken.None);
+
+                string stringBuffer = Encoding.UTF8.GetString(readBuffer, 0, receiveResult.Count);
+                var decoder = MessageDecoder.Create(stringBuffer);
+                if (decoder.IsPriceUpdate()) {
+                    logger.LogInformation("Price update:  {@msg}", stringBuffer);
+                    await socketRegistry.BroadcastMessageAsync(decoder, Encoding.UTF8.GetBytes(stringBuffer));
+                }
+                else
+                    logger.LogInformation("Provider message : {@mesg}", stringBuffer);
+                await Task.Delay(2000);
             }
         }
     }

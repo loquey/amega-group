@@ -18,7 +18,7 @@ namespace FinancialInstrument.Application.SocketHandlers
         void DeregisterSocket(WebSocket webSocket, SubscribeMessage subscribeMessage);
         NewSubscriptionResponse RegisterSocket(WebSocket socket, SubscribeMessage message);
 
-        Task BroadcastMessageAsync(byte[] message);
+        Task BroadcastMessageAsync(IMessageDecoder decoder, byte[] message);
     }
 
     public class SocketRegistry(ILogger<SocketRegistry> logger) : ISocketRegistry
@@ -27,19 +27,23 @@ namespace FinancialInstrument.Application.SocketHandlers
         static private ConcurrentDictionary<Guid, SocketSubscrition> _SocketList = 
             new ConcurrentDictionary<Guid, SocketSubscrition> ();
 
-        public async Task BroadcastMessageAsync(byte[] message)
+        public async Task BroadcastMessageAsync(IMessageDecoder decoder, byte[] message)
         {
             logger.LogInformation("{count} sockets registered", _SocketList.Count);
-            foreach (var (_, socketEntry) in _SocketList)
+            await Parallel.ForEachAsync(_SocketList, async (entry, cancellationToken) =>
             {
-                if (socketEntry.socket.State != WebSocketState.Open) continue;
+                var (_, socketEntry) = entry;
+
+                if (socketEntry.socket.State != WebSocketState.Open ||
+                    !socketEntry.tickers.Contains(decoder.GetTicker())) return;
 
                 await socketEntry.socket.SendAsync(
                     new ArraySegment<byte>(message, 0, message.Count()),
                     WebSocketMessageType.Text,
                     true,
                     CancellationToken.None);
-            }
+                return;
+            });
         }
 
         public void DeregisterSocket(WebSocket webSocket, SubscribeMessage message)

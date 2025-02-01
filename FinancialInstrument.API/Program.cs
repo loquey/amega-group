@@ -43,7 +43,7 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     Log.Information("Starting web application");
-    await app.RunAsync();
+    app.Run();
 }
 catch (Exception ex)
 {
