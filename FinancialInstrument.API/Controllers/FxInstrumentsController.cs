@@ -1,8 +1,13 @@
-﻿using FinancialInstrument.Infrastructure.Repositories;
+﻿using FinancialInstrument.Application.SocketHandlers;
+using FinancialInstrument.Infrastructure.Repositories;
 using FinancialInstrument.Infrastructure.ServiceClients;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
+using System.Collections;
+using System.Net.WebSockets;
+using System.Text;
 
 namespace FinancialInstrument.API.Controllers
 {
@@ -27,5 +32,20 @@ namespace FinancialInstrument.API.Controllers
 
             return Ok(tickerPricing);
         }
+
+        [HttpGet("ws")]
+        public async Task SubscribeToUpdate([FromServices] ISocketHandler socketHandler)
+        {
+            if (HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                await socketHandler.Handle(webSocket);
+            }
+            else
+            {
+                HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+            }
+        }
     }
+
 }

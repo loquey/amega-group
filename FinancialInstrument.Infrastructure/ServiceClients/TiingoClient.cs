@@ -20,8 +20,7 @@ namespace FinancialInstrument.Infrastructure.ServiceClients
         Task<IEnumerable<TickerPriceMessage>> GetTickerPriceAsync(string tickerSymbol);
     }
 
-    class TiingoClient(HttpClient httpclient, 
-            IOptions<TiingoConfig> tiingoConfig ,
+    class TiingoClient(HttpClient httpclient,
             ILogger<TiingoClient> logger) : ITiingoClient
     {
         public async Task<IEnumerable<TickerPriceMessage>> GetTickerPriceAsync(string tickerSymbol)

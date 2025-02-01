@@ -1,3 +1,5 @@
+using FinancialInstrument.API.BackgroundJobs;
+using FinancialInstrument.Application;
 using FinancialInstrument.Infrastructure;
 
 using Serilog;
@@ -11,8 +13,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplicatoin(builder.Configuration);
 builder.Services.AddLogging();
 builder.Services.AddSerilog();
+builder.Services.AddHostedService<LivePriceService>();
 
 var app = builder.Build();
 
@@ -23,11 +27,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseWebSockets();
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -36,7 +43,7 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     Log.Information("Starting web application");
-    app.Run();
+    await app.RunAsync();
 }
 catch (Exception ex)
 {
