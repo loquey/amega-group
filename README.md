@@ -47,5 +47,3 @@ The Tickers currently supported are
 >- EUR/USD,
  >- USD/JPY,
  >- BTC/USD,
-
-> Written with [StackEdit](https://stackedit.io/).
