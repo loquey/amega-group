@@ -28,7 +28,11 @@ namespace FinancialInstrument.API.BackgroundJobs
             {
                 await tiingoClient.ConnectAsync(new Uri(tiingoConfig.Value.WebSocketUrl), stoppingToken);
             }
-            catch (Exception ex) { logger.LogError(ex, "errpr"); }
+            catch (Exception ex) { 
+                logger.LogError(ex, "Failed to connect to service provider");
+                return;
+            }
+
             var tickers = tickerRepository.GetTickers().Select(s => s.TickerSymnbol).ToArray();
 
             var subscribeMessage = new
