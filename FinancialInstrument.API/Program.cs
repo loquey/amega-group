@@ -35,7 +35,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();

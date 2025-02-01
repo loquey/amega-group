@@ -1,26 +1,17 @@
-﻿using FinancialInstrument.Infrastructure.Configuration;
-using FinancialInstrument.Infrastructure.ServiceClients.Messages;
+﻿using FinancialInstrument.Infrastructure.ServiceClients.Messages;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.VisualBasic.FileIO;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FinancialInstrument.Infrastructure.ServiceClients
 {
-
     public interface ITiingoClient
     {
         Task<IEnumerable<TickerPriceMessage>> GetTickerPriceAsync(string tickerSymbol);
     }
 
-    class TiingoClient(HttpClient httpclient,
+    internal class TiingoClient(HttpClient httpclient,
             ILogger<TiingoClient> logger) : ITiingoClient
     {
         public async Task<IEnumerable<TickerPriceMessage>> GetTickerPriceAsync(string tickerSymbol)
@@ -33,6 +24,5 @@ namespace FinancialInstrument.Infrastructure.ServiceClients
 
             return response;
         }
-
     }
 }

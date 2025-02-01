@@ -3,12 +3,7 @@ using FinancialInstrument.Domain.Messages;
 
 using Microsoft.Extensions.Logging;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FinancialInstrument.Application.SocketHandlers
 {
@@ -21,12 +16,10 @@ namespace FinancialInstrument.Application.SocketHandlers
         ISocketRegistry socketRegistry,
         ILogger<DefaultSocketHandler> logger) : ISocketHandler
     {
-
         public async Task Handle(WebSocket webSocket)
         {
             var buffer = new byte[1024 * 4];
             var receiveResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
 
             while (!receiveResult.CloseStatus.HasValue)
             {
@@ -58,10 +51,6 @@ namespace FinancialInstrument.Application.SocketHandlers
                 receiveResult.CloseStatus.Value,
                 receiveResult.CloseStatusDescription,
                 CancellationToken.None);
-
-            
-
-
         }
     }
 }

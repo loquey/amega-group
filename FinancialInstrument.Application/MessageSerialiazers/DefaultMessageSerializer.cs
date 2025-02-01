@@ -1,21 +1,18 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace FinancialInstrument.Application.MessageSerialiazers
 {
     public interface IMessageSerializer
     {
         byte[] Serialize<T>(T subscriptionId);
+
         bool TryDeserialize<T>(byte[] buffer, int count, out T? message);
     }
 
-    public class DefaultMessageSerializer (ILogger<DefaultMessageSerializer> logger) : IMessageSerializer
+    public class DefaultMessageSerializer(ILogger<DefaultMessageSerializer> logger) : IMessageSerializer
     {
         public byte[] Serialize<T>(T subscriptionId)
         {

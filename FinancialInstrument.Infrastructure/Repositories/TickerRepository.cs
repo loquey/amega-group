@@ -1,11 +1,5 @@
 ﻿using FinancialInstrument.Domain.DbEntities;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace FinancialInstrument.Infrastructure.Repositories
 {
     public interface ITickerRepository
@@ -15,7 +9,7 @@ namespace FinancialInstrument.Infrastructure.Repositories
 
     public class TickerRepository : ITickerRepository
     {
-        //Todo: This will likely be coming from a database 
+        //Todo: This will likely be coming from a database
         private static IEnumerable<Ticker> TickerCollection = [
                 new Ticker { TickerName = "Euro Usd pair", TickerSymnbol = "EUR/USD"},
                 new Ticker { TickerName = "Usd Jpy pair", TickerSymnbol = "USD/JPY"},

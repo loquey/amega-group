@@ -2,18 +2,13 @@
 using FinancialInstrument.Infrastructure.Repositories;
 using FinancialInstrument.Infrastructure.ServiceClients;
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
-using System.Collections;
-using System.Net.WebSockets;
-using System.Text;
 
 namespace FinancialInstrument.API.Controllers
 {
     [Route("api/fx")]
     [ApiController]
-    public class FxInstrumentsController(ITickerRepository tickerRepository, ILogger<FxInstrumentsController> logger) 
+    public class FxInstrumentsController(ITickerRepository tickerRepository, ILogger<FxInstrumentsController> logger)
         : ControllerBase
     {
         [HttpGet("tickers")]
@@ -47,5 +42,4 @@ namespace FinancialInstrument.API.Controllers
             }
         }
     }
-
 }

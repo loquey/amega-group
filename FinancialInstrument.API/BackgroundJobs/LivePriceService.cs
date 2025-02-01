@@ -1,13 +1,10 @@
-﻿
-using FinancialInstrument.Application.MessageSerialiazers;
+﻿using FinancialInstrument.Application.MessageSerialiazers;
 using FinancialInstrument.Application.SocketHandlers;
 using FinancialInstrument.Infrastructure.Configuration;
 using FinancialInstrument.Infrastructure.Repositories;
-using FinancialInstrument.Infrastructure.ServiceClients.Messages;
 
 using Microsoft.Extensions.Options;
 
-using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 
@@ -15,7 +12,6 @@ namespace FinancialInstrument.API.BackgroundJobs
 {
     public class LivePriceService(ILogger<LivePriceService> logger, IServiceProvider serviceProvider) : BackgroundService
     {
-
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             logger.LogInformation("Starting live price service");
@@ -28,15 +24,17 @@ namespace FinancialInstrument.API.BackgroundJobs
             ITickerRepository tickerRepository = scope.ServiceProvider.GetRequiredService<ITickerRepository>();
 
             var tiingoClient = new ClientWebSocket();
-            try {
+            try
+            {
                 await tiingoClient.ConnectAsync(new Uri(tiingoConfig.Value.WebSocketUrl), stoppingToken);
             }
             catch (Exception ex) { logger.LogError(ex, "errpr"); }
-            var tickers = tickerRepository.GetTickers().Select(s =>s.TickerSymnbol).ToArray();
+            var tickers = tickerRepository.GetTickers().Select(s => s.TickerSymnbol).ToArray();
 
-            var subscribeMessage = new {
+            var subscribeMessage = new
+            {
                 @event = "subscribe",
-                subscription = new { name = "ticker"},
+                subscription = new { name = "ticker" },
                 pair = tickers
             };
 
@@ -57,7 +55,8 @@ namespace FinancialInstrument.API.BackgroundJobs
 
                 string stringBuffer = Encoding.UTF8.GetString(readBuffer, 0, receiveResult.Count);
                 var decoder = MessageDecoder.Create(stringBuffer);
-                if (decoder.IsPriceUpdate()) {
+                if (decoder.IsPriceUpdate())
+                {
                     logger.LogInformation("Price update:  {@msg}", stringBuffer);
                     await socketRegistry.BroadcastMessageAsync(decoder, Encoding.UTF8.GetBytes(stringBuffer));
                 }

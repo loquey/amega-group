@@ -3,19 +3,15 @@ using FinancialInstrument.Domain.Messages;
 
 using Microsoft.Extensions.Logging;
 
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FinancialInstrument.Application.SocketHandlers
 {
     public interface ISocketRegistry
     {
         void DeregisterSocket(WebSocket webSocket, SubscribeMessage subscribeMessage);
+
         NewSubscriptionResponse RegisterSocket(WebSocket socket, SubscribeMessage message);
 
         Task BroadcastMessageAsync(IMessageDecoder decoder, byte[] message);
@@ -23,9 +19,8 @@ namespace FinancialInstrument.Application.SocketHandlers
 
     public class SocketRegistry(ILogger<SocketRegistry> logger) : ISocketRegistry
     {
-
-        static private ConcurrentDictionary<Guid, SocketSubscrition> _SocketList = 
-            new ConcurrentDictionary<Guid, SocketSubscrition> ();
+        private static ConcurrentDictionary<Guid, SocketSubscrition> _SocketList =
+            new ConcurrentDictionary<Guid, SocketSubscrition>();
 
         public async Task BroadcastMessageAsync(IMessageDecoder decoder, byte[] message)
         {
@@ -50,9 +45,8 @@ namespace FinancialInstrument.Application.SocketHandlers
         {
             if (message.SubscriptionId is null ||
                 !_SocketList.ContainsKey(message.SubscriptionId.Value)) return;
-        
-            _SocketList[message.SubscriptionId.Value].tickers.Remove(message.Ticker);
 
+            _SocketList[message.SubscriptionId.Value].tickers.Remove(message.Ticker);
         }
 
         public NewSubscriptionResponse RegisterSocket(WebSocket socket, SubscribeMessage message)
@@ -61,13 +55,12 @@ namespace FinancialInstrument.Application.SocketHandlers
             {
                 message.SubscriptionId = Guid.NewGuid();
                 _SocketList.TryAdd(message.SubscriptionId.Value, new SocketSubscrition(socket, [message.Ticker]));
-                logger.LogInformation("New socket registered, {count} registered",  _SocketList.Count);
+                logger.LogInformation("New socket registered, {count} registered", _SocketList.Count);
             }
             else if (_SocketList.ContainsKey(message.SubscriptionId.Value))
                 _SocketList[message.SubscriptionId.Value].tickers.Add(message.Ticker);
 
             return new NewSubscriptionResponse { SubscriptionId = message.SubscriptionId.Value };
-
         }
     }
 
