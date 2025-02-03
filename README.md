@@ -31,7 +31,7 @@ The websocket endpoint can be accessed on *wss://localhost:7188/api/fx/ws*
 ### Subscription Request 
 Send the following json request to the websocket endpoint
 
-####Request
+#### Request
 >{
 &nbsp;&nbsp;&nbsp;&nbsp;"event"  :  "subscribe",
 &nbsp;&nbsp;&nbsp;&nbsp;"ticker"  :  "XBT/USD"
