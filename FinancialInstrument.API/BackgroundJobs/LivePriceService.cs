@@ -53,7 +53,7 @@ namespace FinancialInstrument.API.BackgroundJobs
             while (true)
             {
                 if (tiingoClient.State != WebSocketState.Open) {
-                    logger.LogCritical("Connection to service provider lost";
+                    logger.LogCritical("Connection to service provider lost");
                     break;
                 }
 
